@@ -2,12 +2,18 @@ import tkinter as tk
 from PIL import ImageGrab
 import time
 import os
+import sys
 
-save_path = os.path.join(os.getenv("TEMP"), "snip_result.png")
+def get_save_path():
+    if sys.platform == 'win32':
+        return os.path.join(os.getenv("TEMP"), "snip_result.png")
+    else:  # Linux/Mac
+        return '/tmp/snip_result.png'
+
+save_path = get_save_path()
 
 class SnippingTool:
     def __init__(self):
-        print("Initializing SnippingTool...")
         self.root = tk.Tk()
         self.root.attributes("-fullscreen", True)
         self.root.attributes("-alpha", 0.3)
@@ -24,14 +30,16 @@ class SnippingTool:
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_snip)
 
-        print("Starting mainloop")
         self.root.mainloop()
 
     def on_start(self, event):
-        print(f"Start: {event.x}, {event.y}")
         self.start_x = event.x
         self.start_y = event.y
-        self.rect = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline='red', width=2)
+        self.rect = self.canvas.create_rectangle(
+            self.start_x, self.start_y, 
+            self.start_x, self.start_y, 
+            outline='red', width=2
+        )
 
     def on_drag(self, event):
         cur_x = event.x
@@ -44,17 +52,17 @@ class SnippingTool:
         x2 = max(self.start_x, event.x)
         y2 = max(self.start_y, event.y)
 
-        print(f"Snip coordinates: {x1}, {y1}, {x2}, {y2}")
-
         self.root.withdraw()
-        time.sleep(0.2)  # Wait for window to hide
+        time.sleep(0.2)
 
-        # Grab the full screen bbox
-        img = ImageGrab.grab(bbox=(x1, y1, x2, y2))
-        img.save(save_path)
-        print(f"Image saved to {save_path}")
-
-        self.root.quit()
+        try:
+            img = ImageGrab.grab(bbox=(x1, y1, x2, y2))
+            img.save(save_path)
+            print(f"Image saved to {save_path}")
+        except Exception as e:
+            print(f"Error saving image: {e}")
+        finally:
+            self.root.quit()
 
 if __name__ == "__main__":
     SnippingTool()

@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:screenshot/screenshot.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image/image.dart' as img;
-import 'package:file_picker/file_picker.dart';
 import 'translate.dart';
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 
 class SnipScreen extends StatefulWidget {
   @override
@@ -14,76 +14,105 @@ class SnipScreen extends StatefulWidget {
 }
 
 class _SnipScreenState extends State<SnipScreen> {
-  final ScreenshotController _screenshotController = ScreenshotController();
   bool isLoading = false;
 
-
   Future<Uint8List?> runSnipAndGetImage() async {
-    final result = await Process.run('python', ['path/to/snip_tool.py']);
+    try {
+      // Get the application documents directory
+      final appDir = await getApplicationDocumentsDirectory();
+      final scriptPath = '${appDir.path}/snip_tool.py';
       
-    final tempPath = '${Platform.environment['TEMP']}\\snip_result.png';
-    final file = File(tempPath);
-    if (await file.exists()) {
-      return await file.readAsBytes();
+      // Copy the Python script to a accessible location if not already there
+      final scriptFile = File(scriptPath);
+      if (!await scriptFile.exists()) {
+        final bundleScript = await rootBundle.load('assets/snip_tool.py');
+        await scriptFile.writeAsBytes(bundleScript.buffer.asUint8List());
+      }
+
+      // Run the Python script
+      final result = await Process.run('python', [scriptPath]);
+      
+      if (result.exitCode != 0) {
+        print("Error running script: ${result.stderr}");
+        return null;
+      }
+
+      // Check for the result file
+      final tempPath = Platform.isWindows 
+          ? '${Platform.environment['TEMP']}\\snip_result.png'
+          : '/tmp/snip_result.png';
+          
+      final file = File(tempPath);
+      if (await file.exists()) {
+        return await file.readAsBytes();
+      }
+      return null;
+    } catch (e) {
+      print("Error in runSnipAndGetImage: $e");
+      return null;
     }
-    return null;
   }
 
   Future<void> startSnipping() async {
-
-    ElevatedButton(
-      onPressed: () async {
-        final imageBytes = await runSnipAndGetImage();
-        if (imageBytes != null) {
-          // Display the image
-          showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              content: Image.memory(imageBytes),
-            ),
-          );
-        } else {
-          print("No image captured.");
-        }
-      },
-      child: Text("Snip Screen"),
-    );
     setState(() => isLoading = true);
     try {
-      Uint8List? imageBytes = await _screenshotController.capture();
+      var imageBytes = await runSnipAndGetImage();
+      
       if (imageBytes != null) {
-        print("Captured image bytes length: ${imageBytes.length}");
-        var image = img.decodeImage(imageBytes);
-        if (image == null) throw Exception("Failed to decode captured image");
-        imageBytes = img.encodePng(image);
-        String base64Image = base64Encode(imageBytes);
-        var request = http.MultipartRequest('POST', Uri.parse('http://localhost:8000/ocr'));
-        request.files.add(http.MultipartFile.fromBytes('image_bytes', imageBytes, filename: 'capture.png'));
-        var response = await http.post(
-          Uri.parse('http://localhost:8000/ocr'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'image_base64': base64Image}),
-        );
-        var data = jsonDecode(response.body);
-        String extractedText = data['text'];
-        String detectedLanguage = data['language'];
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TranslateScreen(
-              extractedText: extractedText,
-              detectedLanguage: detectedLanguage,
-            ),
+        // Display the image preview
+        final shouldContinue = await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text('Image Captured'),
+            content: Image.memory(imageBytes!),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('Continue'),
+              ),
+            ],
           ),
         );
+
+        if (shouldContinue ?? false) {
+          // Process the image
+          var image = img.decodeImage(imageBytes);
+          if (image == null) throw Exception("Failed to decode captured image");
+          imageBytes = img.encodePng(image);
+          String base64Image = base64Encode(imageBytes);
+          
+          var response = await http.post(
+            Uri.parse('http://localhost:8000/ocr'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'image_base64': base64Image}),
+          );
+          
+          var data = jsonDecode(response.body);
+          String extractedText = data['text'];
+          String detectedLanguage = data['language'];
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TranslateScreen(
+                extractedText: extractedText,
+                detectedLanguage: detectedLanguage,
+              ),
+            ),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Capture failed, no image data')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to capture image')));
       }
     } catch (e) {
       print("Error in startSnipping: $e");
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => isLoading = false);
     }
@@ -91,47 +120,45 @@ class _SnipScreenState extends State<SnipScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Screenshot(
-      controller: _screenshotController,
-      child: Scaffold(
-        appBar: AppBar(title: Text('Snip Screen')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('SnipShot - Snip & Translate'),
-              SizedBox(height: 20),
-              Text('Capture, OCR, and translate text from your screen'),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: isLoading ? null : startSnipping,
-                child: isLoading ? CircularProgressIndicator(color: Colors.white) : Text('Snip Screen'),
-              ),
-              SizedBox(height: 10),
-              Text('Shortcut key: Ctrl + PrtScn'),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(icon: Icon(Icons.help), onPressed: () {}),
-                  IconButton(
-                    icon: Icon(Icons.settings),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => SettingsFrame(),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(title: Text('Snip Screen')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('SnipShot - Snip & Translate'),
+            SizedBox(height: 20),
+            Text('Capture, OCR, and translate text from your screen'),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: isLoading ? null : startSnipping,
+              child: isLoading 
+                  ? CircularProgressIndicator(color: Colors.white) 
+                  : Text('Snip Screen'),
+            ),
+            SizedBox(height: 10),
+            Text('Shortcut key: Ctrl + PrtScn'),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(icon: Icon(Icons.help), onPressed: () {}),
+                IconButton(
+                  icon: Icon(Icons.settings),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => SettingsFrame(),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
-
 }
 
 class SettingsFrame extends StatelessWidget {
