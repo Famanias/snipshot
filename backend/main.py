@@ -1,13 +1,13 @@
-from fastapi import FastAPI, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-import cv2
-import numpy as np
-from groq import Groq
+from fastapi import FastAPI, Body, Form # type: ignore
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
+import cv2 # type: ignore
+import numpy as np # type: ignore
+from groq import Groq # type: ignore
 import os
 import base64
-from dotenv import load_dotenv
-from langdetect import detect
-from fastapi import Body
+from dotenv import load_dotenv # type: ignore
+from langdetect import detect # type: ignore
+from pydantic import BaseModel # type: ignore
 
 app = FastAPI()
 load_dotenv()
@@ -25,9 +25,8 @@ app.add_middleware(
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 @app.post("/preprocess")
-async def preprocess_image(file: UploadFile = File(...)):
-    image = await file.read()
-    image = cv2.imdecode(np.frombuffer(image, np.uint8), cv2.IMREAD_COLOR)
+async def preprocess_image(image_bytes: bytes = Form(...)):
+    image = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     contrast = clahe.apply(gray)
@@ -38,14 +37,18 @@ async def preprocess_image(file: UploadFile = File(...)):
     base64_image = base64.b64encode(encoded_image.tobytes()).decode('utf-8')
     return {"image": base64_image}
 
-@app.post("/ocr")
-async def extract_text(file: UploadFile = File(...)):
-    # Preprocess the image
-    preprocessed_response = await preprocess_image(file)
-    base64_image = preprocessed_response["image"]
+class OCRRequest(BaseModel):
+    image_base64: str
 
-    # Use Groq for OCR
+@app.post("/ocr")
+async def extract_text(request: OCRRequest):
     try:
+        # Decode base64 image
+        image_bytes = base64.b64decode(request.image_base64)
+        preprocessed_response = await preprocess_image(image_bytes)
+        base64_image = preprocessed_response["image"]
+
+        # OCR via Groq
         chat_completion = client.chat.completions.create(
             messages=[
                 {
@@ -62,34 +65,30 @@ async def extract_text(file: UploadFile = File(...)):
                 }
             ],
             model="meta-llama/llama-4-scout-17b-16e-instruct",
-            temperature=0.1,  # Lower temperature for precise extraction
+            temperature=0.1,
             max_completion_tokens=1024,
-            top_p=1,
-            stream=False,
-            stop=None,
         )
         extracted_text = chat_completion.choices[0].message.content.strip()
-        print(f"Groq extracted text: {extracted_text}")
-
-        if extracted_text:
-            detected_lang = detect(extracted_text)
-            print(f"Detected language: {detected_lang}")
-            return {"text": extracted_text, "language": detected_lang}
+        detected_lang = detect(extracted_text)
+        return {"text": extracted_text, "language": detected_lang}
     except Exception as e:
-        return {"error": f"Groq OCR failed: {str(e)}"}
+        return {"error": f"OCR failed: {str(e)}"}
 
-    return {"text": "", "language": "unknown"}
+class TranslationRequest(BaseModel):
+    text: str
+    target_lang: str
 
 @app.post("/translate")
-async def translate_text(text: str = Body(...), target_lang: str = Body(...)):
+async def translate_text(request: TranslationRequest):
     try:
         lang_mapping = {
-            "en_XX": "English",
-            "ja_XX": "Japanese",
-            "ko_KR": "Korean",
-            "zh_CN": "Chinese"
+            "en": "English",
+            "ja": "Japanese",
+            "ko": "Korean",
+            "zh_cn": "Simplified Chinese",
+            "zh_tw": "Traditional Chinese",
         }
-        target_language = lang_mapping.get(target_lang, "English")
+        target_language = lang_mapping.get(request.target_lang, "English")
 
         chat_completion = client.chat.completions.create(
             messages=[
@@ -99,7 +98,7 @@ async def translate_text(text: str = Body(...), target_lang: str = Body(...)):
                 },
                 {
                     "role": "user",
-                    "content": text
+                    "content": request.text
                 }
             ],
             model="meta-llama/llama-4-scout-17b-16e-instruct",

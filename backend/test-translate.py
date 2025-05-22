@@ -9,3 +9,6 @@ data = {
 
 response = requests.post(url, json=data)
 print(response.json())
+
+
+# Run with: uvicorn main:app --reload
