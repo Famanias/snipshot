@@ -82,10 +82,11 @@ async def translate_text(request: TranslationRequest):
     try:
         # Limit target languages to Japanese, Korean, Chinese (Simplified), and English
         lang_mapping = {
-            "en_XX": "English",
-            "ja_XX": "Japanese",
-            "ko_KR": "Korean",
-            "zh_cn": "Simplified Chinese",
+            "en": "English",
+            "ja": "Japanese",
+            "ko": "Korean",
+            "zh_cn": "Traditional Chinese",
+            "zh_tw": "Simplified Chinese",
         }
         target_language = lang_mapping.get(request.target_lang, "English")
         source_language = detect(request.text) if request.text.strip() else "unknown"

@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image/image.dart' as img;
 import 'translate.dart';
-import 'dart:typed_data';
+// import 'dart:typed_data';
 import 'package:flutter/services.dart';
 
 class SnipScreen extends StatefulWidget {
@@ -56,7 +57,13 @@ class _SnipScreenState extends State<SnipScreen> {
   Future<void> startSnipping() async {
     setState(() => isLoading = true);
     try {
+      // Minimize the current window
+      await windowManager.minimize();
+
       var imageBytes = await runSnipAndGetImage();
+
+      await windowManager.restore();
+      await windowManager.focus();
       
       if (imageBytes != null) {
         // Display the image preview
@@ -172,7 +179,7 @@ class SettingsFrame extends StatelessWidget {
         children: [
           DropdownButton<String>(
             value: defaultLanguage,
-            items: ['English', 'Japanese', 'Korean', 'Chinese (Simplified)']
+            items: ['English', 'Japanese', 'Korean', 'Simplified Chinese', 'Traditional Chinese']
                 .map((lang) => DropdownMenuItem(value: lang, child: Text(lang)))
                 .toList(),
             onChanged: (value) {},
