@@ -54,39 +54,12 @@ class _TranslateScreenState extends State<TranslateScreen> {
         padding: EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            Text('Detected Language: ${widget.detectedLanguage}'),
+            SelectableText('Detected Language: ${widget.detectedLanguage}'),
             SizedBox(height: 10),
-            Text('Extracted Text: ${widget.extractedText}'),
+            SelectableText('Extracted Text: ${widget.extractedText}'),
             SizedBox(height: 10),
-            Text('Translation: $translatedText'),
+            SelectableText('Translation: $translatedText'),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('Change Language'),
-                    content: DropdownButton<String>(
-                      value: targetLanguage,
-                      items: ['en_XX', 'ja_XX', 'ko_KR']
-                          .map((lang) => DropdownMenuItem(value: lang, child: Text(lang)))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            targetLanguage = value;
-                            _translateText();
-                          });
-                        }
-                        Navigator.pop(context);
-                      },
-                    ),
-                    actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('Close'))],
-                  ),
-                );
-              },
-              child: Text('Change Language'),
-            ),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
