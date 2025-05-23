@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart'; // replace window_size
+import 'package:window_manager/window_manager.dart';
 import './screens/snip.dart';
 
 void main() async {
@@ -9,12 +9,11 @@ void main() async {
   await windowManager.ensureInitialized();
 
   WindowOptions windowOptions = WindowOptions(
-    size: Size(800, 500),
-    minimumSize: Size(800, 500), 
-    // maximumSize: Size(800, 500),
+    size: Size(500, 400),
+    minimumSize: Size(500, 400),
     center: true,
     backgroundColor: Colors.transparent,
-    titleBarStyle: TitleBarStyle.normal
+    titleBarStyle: TitleBarStyle.normal,
   );
 
   windowManager.waitUntilReadyToShow(windowOptions, () async {

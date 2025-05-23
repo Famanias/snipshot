@@ -23,6 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: Text('Select Target Language'),
       content: DropdownButton<String>(
         value: _selectedLang,
+        icon: SizedBox.shrink(),
         items: languageOptions.entries.map((entry) {
           return DropdownMenuItem<String>(
             value: entry.key,

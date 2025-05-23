@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'snip_button.dart';
 import 'settings.dart';
 import 'settings_controller.dart';
+import 'package:flutter/services.dart';
 
 class TranslateScreen extends StatefulWidget {
   final String extractedText;
@@ -50,6 +51,13 @@ class _TranslateScreenState extends State<TranslateScreen> {
     }
   }
 
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Copied to clipboard')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,33 +70,65 @@ class _TranslateScreenState extends State<TranslateScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SelectableText('Detected Language: ${widget.detectedLanguage}'),
-                      SizedBox(height: 10),
-                      SelectableText(widget.extractedText),
-                    ],
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SelectableText('Detected Language: ${widget.detectedLanguage}'),
+                            SizedBox(width: 10),
+                            IconButton(
+                              onPressed: () => _copyToClipboard(widget.detectedLanguage),
+                              icon: Icon(Icons.copy),
+                              iconSize: 16,
+                              tooltip: 'Copy',
+                            )
+                          ],
+                        ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: SelectableText(widget.extractedText),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SelectableText('Translation:'),
-                      SizedBox(height: 10),
-                      SelectableText(translatedText),
-                    ],
+                  SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SelectableText('Translation:'), 
+                            SizedBox(height: 10),
+                            IconButton(
+                              onPressed: () => _copyToClipboard(translatedText),
+                              icon: Icon(Icons.copy),
+                              iconSize: 16,
+                              tooltip: 'Copy',
+                            ),
+                          ],             
+                        ),   
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: SelectableText(translatedText),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            Spacer(),
+            SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
