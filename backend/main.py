@@ -78,7 +78,9 @@ class TranslationRequest(BaseModel):
     target_lang: str
 
 @app.post("/translate")
+
 async def translate_text(request: TranslationRequest):
+    
     try:
         # Limit target languages to Japanese, Korean, Chinese (Simplified), and English
         lang_mapping = {
