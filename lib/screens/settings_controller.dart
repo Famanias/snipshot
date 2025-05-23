@@ -4,4 +4,5 @@ class SettingsController {
   SettingsController._internal();
 
   String targetLanguageCode = 'en'; // default to English
+  String shortcutKey = 'printScreen'; // default shortcut key
 }

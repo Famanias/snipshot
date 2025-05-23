@@ -1,5 +1,5 @@
 import tkinter as tk
-from PIL import ImageGrab
+from PIL import ImageGrab # type: ignore
 import time
 import os
 import sys

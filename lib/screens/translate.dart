@@ -62,7 +62,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         title: Text('SnipShot - Snip & Translate'),
       ),
       body: Padding(
@@ -81,7 +81,8 @@ class _TranslateScreenState extends State<TranslateScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SelectableText('Detected Language: ${widget.detectedLanguage}'),
+                            // SelectableText('Detected Language: ${widget.detectedLanguage}'),
+                            SelectableText('Extracted Text:'),
                             SizedBox(width: 10),
                             IconButton(
                               onPressed: () => _copyToClipboard(widget.detectedLanguage),
