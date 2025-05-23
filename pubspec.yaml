@@ -45,6 +45,7 @@ dependencies:
   window_size: ^0.1.0
   window_manager: ^0.4.3
   shared_preferences: ^2.5.3
+  hotkey_manager: ^0.2.3
 
 
 dev_dependencies:
