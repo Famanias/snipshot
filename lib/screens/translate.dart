@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'snip_button.dart';
 
 class TranslateScreen extends StatefulWidget {
   final String extractedText;
@@ -49,21 +50,47 @@ class _TranslateScreenState extends State<TranslateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Translate')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('SnipShot - Snip & Translate'),
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: ListView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SelectableText('Detected Language: ${widget.detectedLanguage}'),
-            SizedBox(height: 10),
-            SelectableText('Extracted Text: ${widget.extractedText}'),
-            SizedBox(height: 10),
-            SelectableText('Translation: $translatedText'),
-            SizedBox(height: 20),
-            SizedBox(height: 20),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SelectableText('Detected Language: ${widget.detectedLanguage}'),
+                      SizedBox(height: 10),
+                      SelectableText(widget.extractedText),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SelectableText('Translation:'),
+                      SizedBox(height: 10),
+                      SelectableText(translatedText),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SnipButton(),
+                SizedBox(width: 10),
                 IconButton(icon: Icon(Icons.help), onPressed: () {}),
                 IconButton(
                   icon: Icon(Icons.settings),

@@ -8,6 +8,7 @@ import 'package:image/image.dart' as img;
 import 'translate.dart';
 // import 'dart:typed_data';
 import 'package:flutter/services.dart';
+import 'snip_button.dart';
 
 class SnipScreen extends StatefulWidget {
   @override
@@ -137,12 +138,7 @@ class _SnipScreenState extends State<SnipScreen> {
             SizedBox(height: 20),
             Text('Capture, OCR, and translate text from your screen'),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isLoading ? null : startSnipping,
-              child: isLoading 
-                  ? CircularProgressIndicator(color: Colors.white) 
-                  : Text('Snip Screen'),
-            ),
+            SnipButton(),
             SizedBox(height: 10),
             Text('Shortcut key: Ctrl + PrtScn'),
             SizedBox(height: 20),
