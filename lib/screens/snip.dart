@@ -9,6 +9,7 @@ import 'translate.dart';
 // import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'snip_button.dart';
+import 'settings.dart';
 
 class SnipScreen extends StatefulWidget {
   @override
@@ -151,7 +152,7 @@ class _SnipScreenState extends State<SnipScreen> {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (context) => SettingsFrame(),
+                      builder: (context) => SettingsScreen(),
                     );
                   },
                 ),
@@ -160,43 +161,6 @@ class _SnipScreenState extends State<SnipScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class SettingsFrame extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    String defaultLanguage = 'English';
-    return AlertDialog(
-      title: Text('Settings'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DropdownButton<String>(
-            value: defaultLanguage,
-            items: ['English', 'Japanese', 'Korean', 'Simplified Chinese', 'Traditional Chinese']
-                .map((lang) => DropdownMenuItem(value: lang, child: Text(lang)))
-                .toList(),
-            onChanged: (value) {},
-          ),
-          SwitchListTile(
-            title: Text('Offline Mode'),
-            value: false,
-            onChanged: (value) {},
-            subtitle: Text('Coming Soon'),
-          ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Shortcut Key'),
-            controller: TextEditingController(text: 'Ctrl + PrtScn'),
-            readOnly: true,
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
-        TextButton(onPressed: () => Navigator.pop(context), child: Text('Save')),
-      ],
     );
   }
 }

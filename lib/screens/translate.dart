@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'snip_button.dart';
+import 'settings.dart';
+import 'settings_controller.dart';
 
 class TranslateScreen extends StatefulWidget {
   final String extractedText;
@@ -15,11 +17,12 @@ class TranslateScreen extends StatefulWidget {
 
 class _TranslateScreenState extends State<TranslateScreen> {
   String translatedText = '';
-  String targetLanguage = 'en_XX';
+  String targetLanguage = 'en';
 
   @override
   void initState() {
     super.initState();
+    targetLanguage = SettingsController().targetLanguageCode;
     _translateText();
   }
 
@@ -95,7 +98,10 @@ class _TranslateScreenState extends State<TranslateScreen> {
                 IconButton(
                   icon: Icon(Icons.settings),
                   onPressed: () {
-                    showDialog(context: context, builder: (context) => SettingsFrame());
+                    showDialog(
+                      context: context,
+                      builder: (context) => SettingsScreen(),
+                    );
                   },
                 ),
               ],
@@ -103,22 +109,6 @@ class _TranslateScreenState extends State<TranslateScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class SettingsFrame extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Settings'),
-      content: Text('Settings go here.'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Close'),
-        ),
-      ],
     );
   }
 }
