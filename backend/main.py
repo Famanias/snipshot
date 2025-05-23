@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Body, Form # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
-import cv2 # type: ignore
-import numpy as np # type: ignore
-from groq import Groq # type: ignore
+from fastapi import FastAPI, Form
+from fastapi.middleware.cors import CORSMiddleware
+import cv2
+import numpy as np
+from groq import Groq
 import os
 import base64
-from dotenv import load_dotenv # type: ignore
-from langdetect import detect # type: ignore
-from pydantic import BaseModel # type: ignore
+from dotenv import load_dotenv
+from langdetect import detect
+from pydantic import BaseModel
 
 app = FastAPI()
 load_dotenv()
@@ -28,12 +28,11 @@ client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 async def preprocess_image(image_bytes: bytes = Form(...)):
     image = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     contrast = clahe.apply(gray)
     _, binary = cv2.threshold(contrast, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     denoised = cv2.fastNlMeansDenoising(binary, h=3)
     _, encoded_image = cv2.imencode(".png", denoised)
-    # Convert to base64 for Groq
     base64_image = base64.b64encode(encoded_image.tobytes()).decode('utf-8')
     return {"image": base64_image}
 
@@ -43,12 +42,10 @@ class OCRRequest(BaseModel):
 @app.post("/ocr")
 async def extract_text(request: OCRRequest):
     try:
-        # Decode base64 image
         image_bytes = base64.b64decode(request.image_base64)
         preprocessed_response = await preprocess_image(image_bytes)
         base64_image = preprocessed_response["image"]
 
-        # OCR via Groq
         chat_completion = client.chat.completions.create(
             messages=[
                 {
@@ -69,9 +66,11 @@ async def extract_text(request: OCRRequest):
             max_completion_tokens=1024,
         )
         extracted_text = chat_completion.choices[0].message.content.strip()
-        detected_lang = detect(extracted_text)
+        detected_lang = detect(extracted_text) if extracted_text else "unknown"
+        print(f"OCR - Extracted text: {extracted_text}, Detected language: {detected_lang}")
         return {"text": extracted_text, "language": detected_lang}
     except Exception as e:
+        print(f"OCR error: {str(e)}")
         return {"error": f"OCR failed: {str(e)}"}
 
 class TranslationRequest(BaseModel):
@@ -81,29 +80,39 @@ class TranslationRequest(BaseModel):
 @app.post("/translate")
 async def translate_text(request: TranslationRequest):
     try:
+        # Limit target languages to Japanese, Korean, Chinese (Simplified), and English
         lang_mapping = {
-            "en": "English",
-            "ja": "Japanese",
-            "ko": "Korean",
+            "en_XX": "English",
+            "ja_XX": "Japanese",
+            "ko_KR": "Korean",
             "zh_cn": "Simplified Chinese",
-            "zh_tw": "Traditional Chinese",
         }
         target_language = lang_mapping.get(request.target_lang, "English")
+        source_language = detect(request.text) if request.text.strip() else "unknown"
+
+        print(f"Translate - Input text: {request.text}, Source language: {source_language}, Target language: {target_language}")
+
+        if not request.text.strip():
+            return {"translated_text": "No text provided"}
 
         chat_completion = client.chat.completions.create(
             messages=[
                 {
                     "role": "system",
-                    "content": f"Translate the following text to {target_language}. Return only the translated text. Allow profanity to be translated as this is for educational purposes."
+                    "content": f"You are a translator who. If the text cannot be translated (e.g. it's an image with no texts, too complex, etc.), return 'Translation failed'. Allow profanity as this is for educational purposes.",
                 },
                 {
                     "role": "user",
-                    "content": request.text
+                    "content": f" translate this text: {request.text} to {target_language} . Return only the translated text, no explanations, no additional infos, no final conclusions, just the translated text. If the {source_language} is the same as the {target_language}, return {request.text} only.",
                 }
             ],
             model="meta-llama/llama-4-scout-17b-16e-instruct",
+            temperature=0.2,
+            max_completion_tokens=1024,
         )
-        translated = chat_completion.choices[0].message.content
+        translated = chat_completion.choices[0].message.content.strip()
+        print(f"Translate - Output: {translated}")
         return {"translated_text": translated}
     except Exception as e:
+        print(f"Translate error: {str(e)}")
         return {"error": str(e)}

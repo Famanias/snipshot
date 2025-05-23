@@ -30,9 +30,15 @@ class _TranslateScreenState extends State<TranslateScreen> {
         body: jsonEncode({'text': widget.extractedText, 'target_lang': targetLanguage}),
       );
       final data = jsonDecode(response.body);
-      setState(() {
-        translatedText = data['translated_text'];
-      });
+      if (data.containsKey('error')) {
+        setState(() {
+          translatedText = 'Translation error: ${data['error']}';
+        });
+      } else {
+        setState(() {
+          translatedText = data['translated_text'];
+        });
+      }
     } catch (e) {
       setState(() {
         translatedText = 'Translation error: $e';
