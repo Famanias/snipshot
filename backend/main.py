@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Form
-from fastapi.middleware.cors import CORSMiddleware
-import cv2
-import numpy as np
-from groq import Groq
+from fastapi import FastAPI, Form # type: ignore
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
+import cv2 # type: ignore
+import numpy as np # type: ignore
+from groq import Groq # type: ignore
 import os
 import base64
-from dotenv import load_dotenv
-from langdetect import detect
-from pydantic import BaseModel
+from dotenv import load_dotenv # type: ignore
+from langdetect import detect # type: ignore 
+from pydantic import BaseModel # type: ignore
 
 app = FastAPI()
 load_dotenv()
@@ -119,3 +119,10 @@ async def translate_text(request: TranslationRequest):
     except Exception as e:
         print(f"Translate error: {str(e)}")
         return {"error": str(e)}
+    
+if __name__ == "__main__":
+    import uvicorn # type: ignore
+    import os
+
+    port = int(os.environ.get("PORT", 8000))  # Use PORT from env or default to 8000
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
