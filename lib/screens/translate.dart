@@ -5,6 +5,7 @@ import 'snip_button.dart';
 import 'settings.dart';
 import 'settings_controller.dart';
 import 'package:flutter/services.dart';
+import 'help.dart';
 
 class TranslateScreen extends StatefulWidget {
   final String extractedText;
@@ -135,7 +136,15 @@ class _TranslateScreenState extends State<TranslateScreen> {
               children: [
                 SnipButton(),
                 SizedBox(width: 10),
-                IconButton(icon: Icon(Icons.help), onPressed: () {}),
+                IconButton(
+                  icon: Icon(Icons.help_outline),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => HelpScreen(),
+                    );
+                  },
+                ),
                 IconButton(
                   icon: Icon(Icons.settings),
                   onPressed: () {

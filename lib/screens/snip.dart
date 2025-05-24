@@ -13,6 +13,7 @@ import 'translate.dart';
 import 'snip_button.dart';
 import 'settings.dart';
 import 'settings_controller.dart';
+import 'help.dart';
 
 class SnipScreen extends StatefulWidget {
   @override
@@ -175,7 +176,7 @@ class _SnipScreenState extends State<SnipScreen> with WidgetsBindingObserver {
           content: Image.memory(imageBytes),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
-            TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Continue')),
+            TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Translate')),
           ],
         ),
       );
@@ -238,7 +239,15 @@ class _SnipScreenState extends State<SnipScreen> with WidgetsBindingObserver {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(icon: Icon(Icons.help_outline), onPressed: () {}),
+                IconButton(
+                  icon: Icon(Icons.help_outline),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => HelpScreen(),
+                    );
+                  },
+                ),
                 IconButton(
                   icon: Icon(Icons.settings),
                   onPressed: () async {
