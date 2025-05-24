@@ -17,7 +17,7 @@ Future<Uint8List?> runSnipAndGetImage() async {
 
     final scriptFile = File(scriptPath);
     if (!await scriptFile.exists()) {
-      final bundleScript = await rootBundle.load('assets/snip_tool.py');
+      final bundleScript = await rootBundle.load('backend/snip_tool.py');
       await scriptFile.writeAsBytes(bundleScript.buffer.asUint8List());
     }
 
@@ -53,7 +53,7 @@ Future<void> startSnipping(BuildContext context) async {
         content: Image.memory(imageBytes!),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Continue')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Translate')),
         ],
       ),
     );
