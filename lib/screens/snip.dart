@@ -188,7 +188,7 @@ class _SnipScreenState extends State<SnipScreen> with WidgetsBindingObserver {
         final base64Image = base64Encode(img.encodePng(decodedImage));
 
         final response = await http.post(
-          Uri.parse('http://localhost:8000/ocr'),
+          Uri.parse('https://snipshot-backend.onrender.com/ocr'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'image_base64': base64Image}),
         );

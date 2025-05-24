@@ -17,7 +17,7 @@ Future<Uint8List?> runSnipAndGetImage() async {
 
     final scriptFile = File(scriptPath);
     if (!await scriptFile.exists()) {
-      final bundleScript = await rootBundle.load('backend/snip_tool.py');
+      final bundleScript = await rootBundle.load('assets/snip_tool.py');
       await scriptFile.writeAsBytes(bundleScript.buffer.asUint8List());
     }
 
@@ -65,7 +65,7 @@ Future<void> startSnipping(BuildContext context) async {
       String base64Image = base64Encode(imageBytes);
 
       var response = await http.post(
-        Uri.parse('http://localhost:8000/ocr'),
+        Uri.parse('https://snipshot-backend.onrender.com/ocr'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'image_base64': base64Image}),
       );

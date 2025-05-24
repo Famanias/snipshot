@@ -49,3 +49,11 @@ app.*.map.json
 .env
 *.env
 /.env.*
+
+/installer/
+/installer
+./installer
+
+/backend/
+/backend
+./backend

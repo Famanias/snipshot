@@ -31,7 +31,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
   Future<void> _translateText() async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:8000/translate'),
+        Uri.parse('https://snipshot-backend.onrender.com/translate'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'text': widget.extractedText, 'target_lang': targetLanguage}),
       );
