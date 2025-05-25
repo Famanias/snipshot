@@ -16,6 +16,8 @@ import 'settings_controller.dart';
 import 'help.dart';
 
 class SnipScreen extends StatefulWidget {
+  const SnipScreen({super.key});
+
   @override
   _SnipScreenState createState() => _SnipScreenState();
 }
@@ -170,6 +172,7 @@ class _SnipScreenState extends State<SnipScreen> with WidgetsBindingObserver {
       }
 
       final proceed = await showDialog<bool>(
+        // ignore: use_build_context_synchronously
         context: context,
         builder: (_) => AlertDialog(
           title: Text('Image Captured'),
@@ -188,7 +191,7 @@ class _SnipScreenState extends State<SnipScreen> with WidgetsBindingObserver {
         final base64Image = base64Encode(img.encodePng(decodedImage));
 
         final response = await http.post(
-          Uri.parse('https://snipshot-backend.onrender.com/ocr'),
+          Uri.parse('http://localhost:8000//ocr'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'image_base64': base64Image}),
         );
@@ -198,6 +201,7 @@ class _SnipScreenState extends State<SnipScreen> with WidgetsBindingObserver {
         final detectedLanguage = data['language'];
 
         Navigator.push(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(
             builder: (_) => TranslateScreen(

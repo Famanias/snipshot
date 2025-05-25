@@ -1,6 +1,7 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'dart:io';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -65,7 +66,7 @@ Future<void> startSnipping(BuildContext context) async {
       String base64Image = base64Encode(imageBytes);
 
       var response = await http.post(
-        Uri.parse('https://snipshot-backend.onrender.com/ocr'),
+        Uri.parse('http://localhost:8000/ocr'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'image_base64': base64Image}),
       );

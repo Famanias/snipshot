@@ -1,27 +1,14 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart';
-import 'package:hotkey_manager/hotkey_manager.dart';
 import './screens/snip.dart';
+import 'window_setup.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await windowManager.ensureInitialized();
-  await hotKeyManager.unregisterAll();
-
-  WindowOptions windowOptions = const WindowOptions(
-    size: Size(500, 400),
-    minimumSize: Size(500, 400),
-    center: true,
-    backgroundColor: Colors.transparent,
-    titleBarStyle: TitleBarStyle.normal,
-  );
-
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.setResizable(true);
-    await windowManager.focus();
-  });
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await setupWindow();
+  }
 
   runApp(const SnipShotApp());
 }
@@ -34,7 +21,7 @@ class SnipShotApp extends StatelessWidget {
     return MaterialApp(
       title: 'SnipShot',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: SnipScreen(), // No longer uses SnipHome
+      home: const SnipScreen(),
     );
   }
 }

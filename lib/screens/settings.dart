@@ -35,7 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _saveShortcut() {
     SettingsController().shortcutKey = _controller.text;
-    Navigator.pop(context, true); // Pass `true` to indicate a change
+    Navigator.pop(context, true);
   }
 
   @override
