@@ -5,13 +5,12 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SettingsScreenState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String _selectedLang = SettingsController().targetLanguageCode;
-  late TextEditingController _controller;
+  late TextEditingController _shortcutController;
 
   final Map<String, String> languageOptions = {
     'en': 'English',
@@ -24,33 +23,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: SettingsController().shortcutKey);
+    _shortcutController = TextEditingController(text: SettingsController().shortcutKey);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _shortcutController.dispose();
     super.dispose();
-  }
-
-  void _saveShortcut() {
-    SettingsController().shortcutKey = _controller.text;
-    Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Settings'),
+      title: const Text('Settings'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Select Translation Language:'),
-          SizedBox(height: 10),
+          const Text('Select Translation Language:'),
+          const SizedBox(height: 10),
           DropdownButton<String>(
-            hint: Text('Select Translation Language'),
             value: _selectedLang,
-            icon: SizedBox.shrink(),
             items: languageOptions.entries.map((entry) {
               return DropdownMenuItem<String>(
                 value: entry.key,
@@ -66,26 +58,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }
             },
           ),
-          // SizedBox(height: 10),
-          // TextField(
-          //   controller: _controller,
-          //   decoration: InputDecoration(
-          //     labelText: 'Custom Shortcut Key',
-          //     hintText: 'e.g., Ctrl + Shift + S',
-          //   ),
-          //   onChanged: (value) {
-          //     SettingsController().shortcutKey = value;
-          //   },
-          // ),
+          if (SettingsController().isDesktop) ...[
+            const SizedBox(height: 10),
+            TextField(
+              controller: _shortcutController,
+              decoration: const InputDecoration(
+                labelText: 'Custom Shortcut Key',
+                hintText: 'e.g., Ctrl + Shift + S',
+              ),
+              onChanged: (value) {
+                SettingsController().shortcutKey = value;
+              },
+            ),
+          ],
         ],
       ),
       actions: [
         TextButton(
-          onPressed: () {
-            // You can optionally do some validation or saving here
-            Navigator.pop(context);
-          },
-          child: Text('Close'),
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
         ),
       ],
     );

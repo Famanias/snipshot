@@ -62,7 +62,6 @@ async def extract_text(request: OCRRequest):
                 }
             ],
             model="meta-llama/llama-4-scout-17b-16e-instruct",
-            temperature=0.1,
             max_completion_tokens=1024,
         )
         extracted_text = chat_completion.choices[0].message.content.strip()
@@ -110,7 +109,6 @@ async def translate_text(request: TranslationRequest):
                 }
             ],
             model="meta-llama/llama-4-scout-17b-16e-instruct",
-            temperature=0.2,
             max_completion_tokens=1024,
         )
         translated = chat_completion.choices[0].message.content.strip()

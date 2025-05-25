@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'snip_button.dart';
-import 'settings.dart';
-import 'settings_controller.dart';
 import 'package:flutter/services.dart';
+import '/main.dart';
+import 'settings_controller.dart';
+import 'settings.dart';
 import 'help.dart';
 
 class TranslateScreen extends StatefulWidget {
@@ -55,7 +55,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Copied to clipboard')),
+      const SnackBar(content: Text('Copied to clipboard')),
     );
   }
 
@@ -63,11 +63,10 @@ class _TranslateScreenState extends State<TranslateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // automaticallyImplyLeading: false,
-        title: Text('SnipShot - Snip & Translate'),
+        title: const Text('SnipShot - Snip & Translate'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -82,15 +81,12 @@ class _TranslateScreenState extends State<TranslateScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // SelectableText('Detected Language: ${widget.detectedLanguage}'),
-                            SelectableText('Extracted Text:'),
-                            SizedBox(width: 10),
+                            const Text('Extracted Text:'),
                             IconButton(
-                              onPressed: () => _copyToClipboard(widget.detectedLanguage),
-                              icon: Icon(Icons.copy),
-                              iconSize: 16,
+                              onPressed: () => _copyToClipboard(widget.extractedText),
+                              icon: const Icon(Icons.copy, size: 16),
                               tooltip: 'Copy',
-                            )
+                            ),
                           ],
                         ),
                         Expanded(
@@ -101,7 +97,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,16 +105,14 @@ class _TranslateScreenState extends State<TranslateScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SelectableText('Translation:'), 
-                            SizedBox(height: 10),
+                            const Text('Translation:'),
                             IconButton(
                               onPressed: () => _copyToClipboard(translatedText),
-                              icon: Icon(Icons.copy),
-                              iconSize: 16,
+                              icon: const Icon(Icons.copy, size: 16),
                               tooltip: 'Copy',
                             ),
-                          ],             
-                        ),   
+                          ],
+                        ),
                         Expanded(
                           child: SingleChildScrollView(
                             child: SelectableText(translatedText),
@@ -130,27 +124,30 @@ class _TranslateScreenState extends State<TranslateScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SnipButton(),
-                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () => startSnipping(context),
+                  child: const Text('Snip Again'),
+                ),
+                const SizedBox(width: 10),
                 IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (context) => HelpScreen(),
+                      builder: (context) => const HelpScreen(),
                     );
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.settings),
+                  icon: const Icon(Icons.settings),
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (context) => SettingsScreen(),
+                      builder: (context) => const SettingsScreen(),
                     );
                   },
                 ),
