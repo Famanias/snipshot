@@ -30,23 +30,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  bubble_head: ^0.0.4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  http: ^1.4.0
-  screen_capturer: ^0.2.3
-  path_provider: ^2.1.5
-  image_picker: ^1.1.2
-  file_picker: ^10.1.9
-  image: ^4.5.4
-  screenshot: ^3.0.0
-  window_size: ^0.1.0
-  window_manager: ^0.4.3
-  shared_preferences: ^2.5.3
-  hotkey_manager: ^0.2.3
-
 
 dev_dependencies:
   flutter_test:
@@ -58,14 +46,13 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  permission_handler: ^12.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-  assets:
-    - assets/snip_tool.py
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -73,8 +60,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/icon.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
