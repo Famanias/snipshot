@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Bubble Head Demo',
+      title: 'SnipShot',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -29,7 +29,7 @@ class BubbleHeadDemo extends StatefulWidget {
   State<BubbleHeadDemo> createState() => _BubbleHeadDemoState();
 }
 
-class _BubbleHeadDemoState extends State<BubbleHeadDemo> {
+class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObserver {
   final Bubble _bubble = Bubble(
     shouldBounce: true,
     allowDragToClose: true,
@@ -37,11 +37,24 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> {
   );
 
   bool _hasOverlayPermission = false;
+  bool _bubbleRunning = false;
 
   @override
   void initState() {
     super.initState();
-    _checkPermission();
+    WidgetsBinding.instance.addObserver(this); // Start observing lifecycle changes
+    _initializeBubble();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Stop observing when widget is disposed
+    _stopBubble(); // Ensure bubble is stopped when app is closed
+    super.dispose();
+  }
+
+  Future<void> _initializeBubble() async {
+    await _checkPermission();
   }
 
   Future<void> _checkPermission() async {
@@ -59,23 +72,41 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> {
   }
 
   Future<void> _startBubble() async {
-    if (!_hasOverlayPermission) {
-      await _requestPermission();
-      if (!_hasOverlayPermission) return;
-    }
+    if (!_hasOverlayPermission || _bubbleRunning) return;
 
     try {
-      await _bubble.startBubbleHead(sendAppToBackground: true);
+      // Set sendAppToBackground to false to avoid redirecting to home screen
+      await _bubble.startBubbleHead(sendAppToBackground: false);
+      setState(() {
+        _bubbleRunning = true;
+      });
     } on PlatformException catch (e) {
       debugPrint('Failed to start bubble: ${e.message}');
     }
   }
 
   Future<void> _stopBubble() async {
+    if (!_bubbleRunning) return;
+
     try {
       await _bubble.stopBubbleHead();
+      setState(() {
+        _bubbleRunning = false;
+      });
     } on PlatformException catch (e) {
       debugPrint('Failed to stop bubble: ${e.message}');
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // App is sent to the background (e.g., switched to another app)
+      _startBubble();
+    } else if (state == AppLifecycleState.resumed) {
+      // App is brought back to the foreground
+      _stopBubble();
     }
   }
 
@@ -83,37 +114,37 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bubble Head Demo'),
+        title: const Text('SnipShot'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'Bubble Head Demo',
+              'SnipShot',
               style: TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 20),
             if (!_hasOverlayPermission)
               ElevatedButton(
-                onPressed: _requestPermission,
+                onPressed: () async {
+                  await _requestPermission();
+                  if (_hasOverlayPermission) {
+                    await _startBubble();
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                 ),
                 child: const Text('Grant Overlay Permission'),
               ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _startBubble,
-              child: const Text('Start Bubble'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _stopBubble,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+            Text(
+              _bubbleRunning ? 'Bubble is running' : 'Bubble is not running',
+              style: TextStyle(
+                color: _bubbleRunning ? Colors.green : Colors.red,
+                fontSize: 16,
               ),
-              child: const Text('Stop Bubble'),
             ),
           ],
         ),
