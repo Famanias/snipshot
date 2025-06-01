@@ -128,6 +128,30 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  http:
+    dependency: "direct main"
+    description:
+      name: http
+      sha256: "2c11f3f94c687ee9bad77c171151672986360b2b001d109814ee7140b2cf261b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
+  http_parser:
+    dependency: transitive
+    description:
+      name: http_parser
+      sha256: "178d74305e7866013777bab2c3d8726205dc5a4dd935297175b19a23a2e66571"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.2"
+  image_painter:
+    dependency: "direct main"
+    description:
+      name: image_painter
+      sha256: "0db91550562821d38e54b5960dbb3a7438d7ae3b48733dcee5fffb964b9bf95c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.1"
   leak_tracker:
     dependency: transitive
     description:
@@ -176,6 +200,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.1"
+  media_projection_creator:
+    dependency: transitive
+    description:
+      name: media_projection_creator
+      sha256: e071257e8f97092d352aa3c8adf94a80a7ab53b20ed996ee8cd39dcf586f064c
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  media_projection_screenshot:
+    dependency: "direct main"
+    description:
+      name: media_projection_screenshot
+      sha256: "492102e98c8392c260c363c4cb3aa26606ce19c4c3c564164ea0d70c97b499d8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.6"
   meta:
     dependency: transitive
     description:

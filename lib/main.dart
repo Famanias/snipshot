@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:bubble_head/bubble.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
+import 'snip_screen.dart';
+import 'translate_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -107,6 +109,14 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObse
     } else if (state == AppLifecycleState.resumed) {
       // App is brought back to the foreground
       _stopBubble();
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SnipScreen(),
+        ),
+      );
+      
     }
   }
 
