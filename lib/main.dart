@@ -102,7 +102,7 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObse
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
-      // App is sent to the background (e.g., switched to another app)
+      // App is sent to the background
       _startBubble();
     } else if (state == AppLifecycleState.resumed) {
       // App is brought back to the foreground
@@ -137,15 +137,7 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObse
                   backgroundColor: Colors.orange,
                 ),
                 child: const Text('Grant Overlay Permission'),
-              ),
-            const SizedBox(height: 20),
-            Text(
-              _bubbleRunning ? 'Bubble is running' : 'Bubble is not running',
-              style: TextStyle(
-                color: _bubbleRunning ? Colors.green : Colors.red,
-                fontSize: 16,
-              ),
-            ),
+              )
           ],
         ),
       ),
