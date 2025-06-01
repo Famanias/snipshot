@@ -73,7 +73,7 @@ class DrawingOverlayService : Service() {
         }
     }
 
-    class RectangleSelectionView(context: Context) : View(context) {
+    inner class RectangleSelectionView(context: Context) : View(context) {
         private val paint = Paint().apply {
             color = Color.argb(150, 0, 0, 255) // Semi-transparent blue
             style = Paint.Style.STROKE
@@ -107,7 +107,18 @@ class DrawingOverlayService : Service() {
                     endY = event.y
                     isDrawing = false
                     invalidate()
-                    // You can handle cropping or capturing the area here if needed
+
+                    // Send the coordinates to ScreenshotService to start screenshot & crop
+                    val intent = Intent(context, ScreenshotService::class.java).apply {
+                        putExtra("startX", startX)
+                        putExtra("startY", startY)
+                        putExtra("endX", endX)
+                        putExtra("endY", endY)
+                    }
+                    context.startService(intent)
+
+                    // Close overlay service after selection
+                    stopSelf()
                 }
             }
             return true

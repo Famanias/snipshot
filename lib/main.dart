@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:bubble_head/bubble.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
-import 'snip_screen.dart';
-import 'translate_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,20 +36,22 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObse
     showCloseButton: false,
   );
 
+  static const MethodChannel _channel = MethodChannel('screenshot_channel');
+
   bool _hasOverlayPermission = false;
   bool _bubbleRunning = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // Start observing lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
     _initializeBubble();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // Stop observing when widget is disposed
-    _stopBubble(); // Ensure bubble is stopped when app is closed
+    WidgetsBinding.instance.removeObserver(this);
+    _stopBubble();
     super.dispose();
   }
 
@@ -77,7 +77,6 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObse
     if (!_hasOverlayPermission || _bubbleRunning) return;
 
     try {
-      // Set sendAppToBackground to false to avoid redirecting to home screen
       await _bubble.startBubbleHead(sendAppToBackground: false);
       setState(() {
         _bubbleRunning = true;
@@ -100,6 +99,14 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObse
     }
   }
 
+  Future<void> _startSnipping() async {
+    try {
+      await _channel.invokeMethod('startSnipping');
+    } on PlatformException catch (e) {
+      debugPrint('Failed to start snipping: ${e.message}');
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -107,16 +114,9 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObse
       // App is sent to the background
       _startBubble();
     } else if (state == AppLifecycleState.resumed) {
-      // App is brought back to the foreground
+      // App is brought to foreground after bubble tap
       _stopBubble();
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const SnipScreen(),
-        ),
-      );
-      
+      _startSnipping(); // Ask for screen recording permission from native code
     }
   }
 
@@ -148,6 +148,11 @@ class _BubbleHeadDemoState extends State<BubbleHeadDemo> with WidgetsBindingObse
                 ),
                 child: const Text('Grant Overlay Permission'),
               )
+            else
+              ElevatedButton(
+                onPressed: _startBubble,
+                child: const Text('Start SnipShot Bubble'),
+              ),
           ],
         ),
       ),

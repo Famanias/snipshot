@@ -31,13 +31,22 @@ class ScreenshotService : Service() {
     private var virtualDisplay: VirtualDisplay? = null
     private var imageReader: ImageReader? = null
 
+    private var cropStartX: Float = 0f
+    private var cropStartY: Float = 0f
+    private var cropEndX: Float = 0f
+    private var cropEndY: Float = 0f
+
     override fun onCreate() {
         super.onCreate()
-
         startForeground(1, createNotification())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        cropStartX = intent?.getFloatExtra("startX", 0f) ?: 0f
+        cropStartY = intent?.getFloatExtra("startY", 0f) ?: 0f
+        cropEndX = intent?.getFloatExtra("endX", 0f) ?: 0f
+        cropEndY = intent?.getFloatExtra("endY", 0f) ?: 0f
+
         projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         mediaProjection = projectionManager.getMediaProjection(resultCode, resultData!!)
 
@@ -73,7 +82,23 @@ class ScreenshotService : Service() {
             bitmap.copyPixelsFromBuffer(buffer)
 
             image.close()
-            saveBitmap(bitmap)
+
+            // Crop the bitmap to selected rectangle
+            val left = minOf(cropStartX, cropEndX).toInt().coerceAtLeast(0)
+            val top = minOf(cropStartY, cropEndY).toInt().coerceAtLeast(0)
+            val right = maxOf(cropStartX, cropEndX).toInt().coerceAtMost(bitmap.width)
+            val bottom = maxOf(cropStartY, cropEndY).toInt().coerceAtMost(bitmap.height)
+
+            val cropWidth = right - left
+            val cropHeight = bottom - top
+
+            if (cropWidth > 0 && cropHeight > 0) {
+                val croppedBitmap = Bitmap.createBitmap(bitmap, left, top, cropWidth, cropHeight)
+                saveBitmap(croppedBitmap)
+            } else {
+                // If invalid crop area, save full bitmap
+                saveBitmap(bitmap)
+            }
 
             stopSelf()
 
@@ -85,10 +110,10 @@ class ScreenshotService : Service() {
     private fun saveBitmap(bitmap: Bitmap) {
         val date = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val filePath = "${externalCacheDir?.absolutePath}/screenshot_$date.png"
-        val outputStream = FileOutputStream(filePath)
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        outputStream.flush()
-        outputStream.close()
+        FileOutputStream(filePath).use { outputStream ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+        }
         Log.d("ScreenshotService", "Saved screenshot: $filePath")
     }
 

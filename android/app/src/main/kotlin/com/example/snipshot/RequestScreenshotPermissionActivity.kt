@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
+import android.widget.Toast
 
 class RequestScreenshotPermissionActivity : Activity() {
 
@@ -15,20 +16,31 @@ class RequestScreenshotPermissionActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Request screen capture permission from the user
         val projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        val intent = projectionManager.createScreenCaptureIntent()
-        startActivityForResult(intent, SCREENSHOT_REQUEST_CODE)
+        val captureIntent = projectionManager.createScreenCaptureIntent()
+        startActivityForResult(captureIntent, SCREENSHOT_REQUEST_CODE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == SCREENSHOT_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            ScreenshotService.resultCode = resultCode
-            ScreenshotService.resultData = data
+        super.onActivityResult(requestCode, resultCode, data)
 
-            val intent = Intent(this, ScreenshotService::class.java)
-            startService(intent)
+        if (requestCode == SCREENSHOT_REQUEST_CODE) {
+            if (resultCode == RESULT_OK && data != null) {
+                // Pass MediaProjection permission result to your service (or wherever you handle capture)
+                ScreenshotService.resultCode = resultCode
+                ScreenshotService.resultData = data
+
+                // Start the screenshot/drawing overlay service
+                val serviceIntent = Intent(this, ScreenshotService::class.java)
+                startService(serviceIntent)
+
+            } else {
+                // User denied screen capture permission
+                Toast.makeText(this, "Screen capture permission denied", Toast.LENGTH_SHORT).show()
+            }
+            // Close this permission activity after handling the result
+            finish()
         }
-
-        finish() // Close the activity
     }
 }
