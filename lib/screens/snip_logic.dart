@@ -1,6 +1,7 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -47,6 +48,7 @@ Future<void> startSnipping(BuildContext context) async {
 
   if (imageBytes != null) {
     final shouldContinue = await showDialog<bool>(
+      // ignore: use_build_context_synchronously
       context: context,
       builder: (_) => AlertDialog(
         title: Text('Image Captured'),
@@ -75,6 +77,7 @@ Future<void> startSnipping(BuildContext context) async {
       String detectedLanguage = data['language'];
 
       Navigator.push(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
           builder: (context) => TranslateScreen(
@@ -85,6 +88,7 @@ Future<void> startSnipping(BuildContext context) async {
       );
     }
   } else {
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Failed to capture image')),
     );

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -16,6 +18,8 @@ import 'settings_controller.dart';
 import 'help.dart';
 
 class SnipScreen extends StatefulWidget {
+  const SnipScreen({super.key});
+
   @override
   _SnipScreenState createState() => _SnipScreenState();
 }
