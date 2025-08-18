@@ -33,6 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.dispose();
   }
 
+  // ignore: unused_element
   void _saveShortcut() {
     SettingsController().shortcutKey = _controller.text;
     Navigator.pop(context, true); // Pass `true` to indicate a change
@@ -65,24 +66,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
               }
             },
-          ),
-          // SizedBox(height: 10),
-          // TextField(
-          //   controller: _controller,
-          //   decoration: InputDecoration(
-          //     labelText: 'Custom Shortcut Key',
-          //     hintText: 'e.g., Ctrl + Shift + S',
-          //   ),
-          //   onChanged: (value) {
-          //     SettingsController().shortcutKey = value;
-          //   },
-          // ),
+          )
         ],
       ),
       actions: [
         TextButton(
           onPressed: () {
-            // You can optionally do some validation or saving here
             Navigator.pop(context);
           },
           child: Text('Close'),

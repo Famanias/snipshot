@@ -102,7 +102,7 @@ async def translate_text(request: TranslationRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": f"You are a translator who. If the text cannot be translated (e.g. it's an image with no texts, too complex, etc.), return 'Translation failed'. Allow profanity as this is for educational purposes.",
+                    "content": f"You are a translator who tranlates extracted texts. If the text cannot be translated (e.g. it's an image with no texts, too complex, unclear translation, etc.), return 'Translation failed'. Allow profanity as this is for educational purposes.",
                 },
                 {
                     "role": "user",

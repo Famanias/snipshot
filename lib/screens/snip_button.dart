@@ -4,7 +4,7 @@ import 'snip_logic.dart';
 class SnipButton extends StatefulWidget {
   final VoidCallback? onCompleted;
 
-  const SnipButton({this.onCompleted});
+  const SnipButton({super.key, this.onCompleted});
 
   @override
   _SnipButtonState createState() => _SnipButtonState();
@@ -19,6 +19,7 @@ class _SnipButtonState extends State<SnipButton> {
       await startSnipping(context);
       widget.onCompleted?.call();
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
